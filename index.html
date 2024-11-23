@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIERNES XXI</title>
+    <style>
+        /* Estilos Generales */
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e2f;
+            color: #fff;
+        }
+
+        h1 {
+            background-color: #4c4c6d;
+            color: #f3f4f6;
+            padding: 20px;
+            margin: 0;
+            font-size: 28px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .input-container {
+            margin: 20px auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        input {
+            padding: 12px;
+            font-size: 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(135deg, #6c63ff, #4843c4);
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #4843c4, #6c63ff);
+            transform: translateY(-2px);
+        }
+
+        canvas {
+            border: 2px solid #4c4c6d;
+            display: block;
+            margin: 20px auto;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .results,
+        .legend,
+        .rules,
+        .explanation {
+            margin: 20px auto;
+            font-size: 16px;
+            text-align: left;
+            padding: 20px;
+            border: 1px solid #4c4c6d;
+            background-color: #2b2b3d;
+            color: #d1d1e0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            max-width: 800px;
+        }
+
+        .results h3,
+        .legend h3,
+        .rules h3,
+        .explanation h3 {
+            text-align: center;
+            background-color: #4c4c6d;
+            color: #fff;
+            padding: 10px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        ul {
+            list-style-type: square;
+            padding-left: 20px;
+        }
+
+        /* Media Queries */
+        @media screen and (max-width: 768px) {
+            h1 {
+                font-size: 24px;
+                padding: 15px;
+            }
+
+            p {
+                font-size: 16px;
+                margin: 5px 0;
+            }
+
+            .input-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            input,
+            button {
+                width: 90%;
+                max-width: 400px;
+            }
+
+            canvas {
+                width: 95%;
+                max-width: 95%;
+            }
+
+            .results,
+            .legend,
+            .rules,
+            .explanation {
+                width: 95%;
+                margin: 10px auto;
+            }
+
+            .results h3,
+            .legend h3,
+            .rules h3,
+            .explanation h3 {
+                font-size: 18px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 18px;
+                padding: 10px;
+            }
+
+            p {
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .results,
+            .legend,
+            .rules,
+            .explanation {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .results h3,
+            .legend h3,
+            .rules h3,
+            .explanation h3 {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🌳VIERNES XXI🌳</h1>
+    <p>Selecciona el modo: letras (A-Z) o números (1-100) para construir tu árbol binario.</p>
+
+    <div class="input-container">
+        <button onclick="setMode('letters')">Modo Letras</button>
+        <button onclick="setMode('numbers')">Modo Números</button>
+        <input type="text" id="inputField" placeholder="Ingresa letras o números">
+        <button onclick="addData()">Agregar</button>
+        <button onclick="startTraversal('inOrder')">InOrden</button>
+        <button onclick="startTraversal('preOrder')">PreOrden</button>
+        <button onclick="startTraversal('postOrder')">PostOrden</button>
+        <button onclick="toggleLegend()">Mostrar/Ocultar Leyenda</button>
+        <button onclick="toggleRules()">Ver Reglas</button>
+        <button onclick="toggleExplanation()">Por qué se agregó aquí</button>
+    </div>
+
+    <canvas id="treeCanvas" width="1200" height="800"></canvas>
+
+    <div class="results" id="results">
+        <h3>Resultados de Recorridos</h3>
+        <p><strong>InOrden:</strong> <span id="inOrder"></span></p>
+        <p><strong>PreOrden:</strong> <span id="preOrder"></span></p>
+        <p><strong>PostOrden:</strong> <span id="postOrder"></span></p>
+    </div>
+
+    <div class="legend" id="legend">
+        <h3>Leyenda de Colores</h3>
+        <p><strong>Raíz:</strong> Naranja.</p>
+        <p><strong>Hojas:</strong> Verde.</p>
+        <p><strong>Ramas Internas:</strong> Blanco.</p>
+        <p><strong>Línea Azul:</strong> Subárbol izquierdo (menores).</p>
+        <p><strong>Línea Roja:</strong> Subárbol derecho (mayores).</p>
+        <p><strong>Amarillo:</strong> Nodo siendo visitado en el recorrido.</p>
+    </div>
+
+    <div class="rules" id="rules">
+        <h3>Reglas de los Métodos</h3>
+        <p><strong>InOrden:</strong> Visita primero el subárbol izquierdo, luego la raíz, y finalmente el subárbol
+            derecho.</p>
+        <p><strong>PreOrden:</strong> Visita primero la raíz, luego el subárbol izquierdo, y finalmente el subárbol
+            derecho.</p>
+        <p><strong>PostOrden:</strong> Visita primero el subárbol izquierdo, luego el subárbol derecho, y finalmente la
+            raíz.</p>
+    </div>
+
+    <div class="explanation" id="explanation">
+        <h3>Explicación de Ubicación de los Nodos</h3>
+        <ul id="explanationList"></ul>
+    </div>
+
+
+    <script>
+        let mode = "letters"; // Modo inicial: letras
+        let explanationDetails = []; // Lista global para almacenar explicaciones
+
+        class TreeNode {
+            constructor(value) {
+                this.value = value;
+                this.left = null;
+                this.right = null;
+                this.x = 0;
+                this.y = 0;
+            }
+        }
+
+        class BinaryTree {
+            constructor() {
+                this.root = null;
+            }
+
+            insert(value) {
+                const newNode = new TreeNode(value);
+                if (!this.root) {
+                    this.root = newNode;
+                    explanationDetails.push(`Nodo ${value} es la raíz del árbol.`);
+                } else {
+                    this._insertNode(this.root, newNode, `Nodo ${value}`);
+                }
+            }
+
+            _insertNode(node, newNode, explanation) {
+                if (newNode.value < node.value) {
+                    if (!node.left) {
+                        node.left = newNode;
+                        explanationDetails.push(`${explanation} se colocó a la izquierda de ${node.value} porque es menor.`);
+                    } else {
+                        this._insertNode(node.left, newNode, explanation);
+                    }
+                } else {
+                    if (!node.right) {
+                        node.right = newNode;
+                        explanationDetails.push(`${explanation} se colocó a la derecha de ${node.value} porque es mayor o igual.`);
+                    } else {
+                        this._insertNode(node.right, newNode, explanation);
+                    }
+                }
+            }
+
+            traverseAndDraw(ctx, node, x, y, level = 1, parentX = null, parentY = null, isLeft = false) {
+                if (!node) return;
+
+                const horizontalSpacing = 400 / Math.pow(2, level);
+                const verticalSpacing = 80;
+
+                if (parentX !== null && parentY !== null) {
+                    ctx.beginPath();
+                    ctx.moveTo(parentX, parentY);
+                    ctx.lineTo(x, y);
+                    ctx.strokeStyle = isLeft ? "blue" : "red";
+                    ctx.stroke();
+                }
+
+                node.x = x;
+                node.y = y;
+
+                let nodeColor = "white";
+                if (node === this.root) nodeColor = "orange";
+                else if (!node.left && !node.right) nodeColor = "green";
+
+                ctx.beginPath();
+                ctx.arc(x, y, 20, 0, 2 * Math.PI);
+                ctx.fillStyle = nodeColor;
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = "black";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.font = "16px Arial";
+                ctx.fillText(node.value, x, y);
+
+                this.traverseAndDraw(ctx, node.left, x - horizontalSpacing, y + verticalSpacing, level + 1, x, y, true);
+                this.traverseAndDraw(ctx, node.right, x + horizontalSpacing, y + verticalSpacing, level + 1, x, y, false);
+            }
+        }
+
+        const tree = new BinaryTree();
+        const canvas = document.getElementById("treeCanvas");
+        const ctx = canvas.getContext("2d");
+
+        function setMode(selectedMode) {
+            mode = selectedMode;
+            const placeholder = mode === "letters" ? "Ingresa letras (A-Z)" : "Ingresa números (1-100)";
+            document.getElementById("inputField").placeholder = placeholder;
+            alert(`Modo cambiado a ${mode === "letters" ? "Letras" : "Números"}`);
+        }
+
+        function toggleLegend() {
+            const legend = document.getElementById("legend");
+            legend.classList.toggle("visible");
+        }
+
+        function toggleRules() {
+            const rules = document.getElementById("rules");
+            rules.classList.toggle("visible");
+        }
+
+        function toggleExplanation() {
+            const explanation = document.getElementById("explanation");
+            const explanationList = document.getElementById("explanationList");
+
+            explanationList.innerHTML = "";
+            explanationDetails.forEach(detail => {
+                const listItem = document.createElement("li");
+                listItem.textContent = detail;
+                explanationList.appendChild(listItem);
+            });
+
+            explanation.classList.toggle("visible");
+        }
+
+        function addData() {
+            const input = document.getElementById("inputField").value.trim();
+
+            if (mode === "letters" && !/^[A-Z]+$/.test(input)) {
+                alert("Por favor, ingresa solo letras (A-Z).");
+                return;
+            }
+
+            if (mode === "numbers" && !/^\d+(\s\d+)*$/.test(input)) {
+                alert("Por favor, ingresa solo números (1-100).");
+                return;
+            }
+
+            const values = mode === "letters" ? input.split("") : input.split(/\s+/).map(Number);
+
+            for (const value of values) {
+                tree.insert(value);
+            }
+
+            updateTree();
+            document.getElementById("inputField").value = "";
+        }
+
+        function updateTree() {
+            adjustCanvasSize(tree);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            tree.traverseAndDraw(ctx, tree.root, canvas.width / 2, 50);
+
+            document.getElementById("inOrder").textContent = tree.traverseInOrder(tree.root).map(n => n.value).join(", ");
+            document.getElementById("preOrder").textContent = tree.traversePreOrder(tree.root).map(n => n.value).join(", ");
+            document.getElementById("postOrder").textContent = tree.traversePostOrder(tree.root).map(n => n.value).join(", ");
+        }
+
+        function adjustCanvasSize(tree) {
+            const depth = getTreeDepth(tree.root);
+            canvas.width = 1200;
+            canvas.height = 100 + depth * 80;
+        }
+
+        function getTreeDepth(node) {
+            if (!node) return 0;
+            const leftDepth = getTreeDepth(node.left);
+            const rightDepth = getTreeDepth(node.right);
+            return Math.max(leftDepth, rightDepth) + 1;
+        }
+
+        function startTraversal(type) {
+            const order = {
+                inOrder: tree.traverseInOrder(tree.root),
+                preOrder: tree.traversePreOrder(tree.root),
+                postOrder: tree.traversePostOrder(tree.root),
+            }[type];
+
+            if (!order || order.length === 0) return;
+
+            let index = 0;
+
+            function animate() {
+                if (index > 0) {
+                    const previous = order[index - 1];
+                    tree.traverseAndDraw(ctx, tree.root, canvas.width / 2, 50);
+                }
+
+                if (index < order.length) {
+                    const current = order[index];
+                    ctx.beginPath();
+                    ctx.arc(current.x, current.y, 20, 0, 2 * Math.PI);
+                    ctx.fillStyle = "yellow";
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = "black";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.font = "16px Arial";
+                    ctx.fillText(current.value, current.x, current.y);
+
+                    index++;
+                    setTimeout(animate, 1000);
+                }
+            }
+
+            animate();
+        }
+
+        BinaryTree.prototype.traverseInOrder = function (node, result = []) {
+            if (node) {
+                this.traverseInOrder(node.left, result);
+                result.push(node);
+                this.traverseInOrder(node.right, result);
+            }
+            return result;
+        };
+
+        BinaryTree.prototype.traversePreOrder = function (node, result = []) {
+            if (node) {
+                result.push(node);
+                this.traversePreOrder(node.left, result);
+                this.traversePreOrder(node.right, result);
+            }
+            return result;
+        };
+
+        BinaryTree.prototype.traversePostOrder = function (node, result = []) {
+            if (node) {
+                this.traversePostOrder(node.left, result);
+                this.traversePostOrder(node.right, result);
+                result.push(node);
+            }
+            return result;
+        };
+    </script>
+</body>
+
+</html>
